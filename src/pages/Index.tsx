@@ -125,7 +125,7 @@ export default function Index() {
               <div className="flex flex-col gap-2 text-right">
                 <div className="flex items-center justify-end gap-2">
                   <span style={{ ...monoStyle, fontSize: 18, fontWeight: 600, letterSpacing: "0.05em", color: "var(--eng-ink)" }}>
-                    +7 (495) 000-00-00
+                    +7 (908) 142-94-39
                   </span>
                   <Icon name="Phone" size={14} style={{ color: "var(--eng-accent)" }} />
                 </div>
