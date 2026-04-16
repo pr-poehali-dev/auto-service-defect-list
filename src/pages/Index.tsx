@@ -101,17 +101,23 @@ export default function Index() {
             <div className="flex items-start justify-between gap-8">
 
               <div className="flex items-center gap-5">
-                <div style={{ width: 72, height: 72, border: "2.5px solid var(--eng-ink)", position: "relative", flexShrink: 0 }}>
-                  <div style={{ position: "absolute", inset: 4, border: "1px solid var(--eng-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Icon name="Wrench" size={28} style={{ color: "var(--eng-accent)" }} />
-                  </div>
-                </div>
+                {/* BMW Logo SVG */}
+                <svg viewBox="0 0 100 100" width="72" height="72" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                  <circle cx="50" cy="50" r="48" fill="var(--eng-ink)" stroke="var(--eng-ink)" strokeWidth="2"/>
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="#fff" strokeWidth="2"/>
+                  <path d="M50 8 A42 42 0 0 1 92 50 L50 50 Z" fill="#1a5f8a"/>
+                  <path d="M50 50 L92 50 A42 42 0 0 1 50 92 Z" fill="#fff"/>
+                  <path d="M50 92 A42 42 0 0 1 8 50 L50 50 Z" fill="#1a5f8a"/>
+                  <path d="M50 50 L8 50 A42 42 0 0 1 50 8 Z" fill="#fff"/>
+                  <circle cx="50" cy="50" r="14" fill="var(--eng-ink)" stroke="#fff" strokeWidth="1.5"/>
+                  <text x="50" y="54" textAnchor="middle" style={{ fontFamily: "'Oswald', sans-serif", fontSize: 9, fill: "#fff", fontWeight: 700, letterSpacing: "0.05em" }}>BMW</text>
+                </svg>
                 <div>
                   <div style={{ ...oswaldStyle, fontSize: 26, fontWeight: 700, letterSpacing: "0.06em", lineHeight: 1.1, color: "var(--eng-ink)" }}>
-                    АВТО СЕРВИС
+                    МТЕХ-СЕРВИС
                   </div>
                   <div style={{ ...oswaldStyle, fontSize: 13, fontWeight: 300, letterSpacing: "0.2em", color: "var(--eng-accent2)", marginTop: 2 }}>
-                    ПРОФЕССИОНАЛЬНЫЙ РЕМОНТ
+                    ОФИЦИАЛЬНЫЙ СЕРВИС BMW
                   </div>
                 </div>
               </div>
@@ -119,12 +125,12 @@ export default function Index() {
               <div className="flex flex-col gap-2 text-right">
                 <div className="flex items-center justify-end gap-2">
                   <span style={{ ...monoStyle, fontSize: 18, fontWeight: 600, letterSpacing: "0.05em", color: "var(--eng-ink)" }}>
-                    +7 (900) 123-45-67
+                    +7 (495) 000-00-00
                   </span>
                   <Icon name="Phone" size={14} style={{ color: "var(--eng-accent)" }} />
                 </div>
                 <div className="flex items-center justify-end gap-2">
-                  <span style={{ ...monoStyle, fontSize: 12, color: "rgba(26,26,46,0.6)" }}>ул. Промышленная, д. 12, стр. 3</span>
+                  <span style={{ ...monoStyle, fontSize: 12, color: "rgba(26,26,46,0.6)" }}>ул. Антонова-Овсеенко, 28д</span>
                   <Icon name="MapPin" size={12} style={{ color: "var(--eng-accent)" }} />
                 </div>
                 <div className="flex items-center justify-end gap-2">
