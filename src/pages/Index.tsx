@@ -1,11 +1,6 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-const SEVERITY_OPTIONS = [
-  { value: "low", label: "Незначительное", cls: "severity-low" },
-  { value: "medium", label: "Среднее", cls: "severity-medium" },
-  { value: "high", label: "Критическое", cls: "severity-high" },
-];
 
 interface Defect {
   id: number;
@@ -15,28 +10,13 @@ interface Defect {
   recommendation: string;
 }
 
-const INITIAL_DEFECTS: Defect[] = [
-  {
-    id: 1,
-    zone: "Передний бампер",
-    description: "Трещина бампера в зоне левого противотуманного фонаря, царапины ЛКП 15×3 см",
-    severity: "medium",
-    recommendation: "Покраска, восстановление геометрии",
-  },
-  {
-    id: 2,
-    zone: "Левое переднее крыло",
-    description: "Вмятина Ø 8 см без нарушения ЛКП, следы контакта с посторонним предметом",
-    severity: "low",
-    recommendation: "PDR-рихтовка без покраски",
-  },
-  {
-    id: 3,
-    zone: "Двигатель / масляная система",
-    description: "Подтёк масла в районе прокладки поддона картера, уровень масла ниже нормы",
-    severity: "high",
-    recommendation: "Замена прокладки поддона, промывка двигателя",
-  },
+const INITIAL_REC: Defect[] = [
+  { id: 1, zone: "Тормозные колодки", description: "Износ передних тормозных колодок до 3 мм. Рекомендована замена при следующем ТО.", severity: "low", recommendation: "" },
+  { id: 2, zone: "Воздушный фильтр", description: "Загрязнение фильтрующего элемента. Рекомендована замена через 5 000 км.", severity: "low", recommendation: "" },
+];
+
+const INITIAL_CRIT: Defect[] = [
+  { id: 1, zone: "Двигатель / масляная система", description: "Подтёк масла в районе прокладки поддона картера, уровень масла ниже минимума. Эксплуатация запрещена.", severity: "high", recommendation: "" },
 ];
 
 const today = new Date();
@@ -47,20 +27,32 @@ const monoStyle = { fontFamily: "'IBM Plex Mono', monospace" } as const;
 const oswaldStyle = { fontFamily: "'Oswald', sans-serif" } as const;
 
 export default function Index() {
-  const [defects, setDefects] = useState<Defect[]>(INITIAL_DEFECTS);
-  const [nextId, setNextId] = useState(4);
+  const [recDefects, setRecDefects] = useState<Defect[]>(INITIAL_REC);
+  const [critDefects, setCritDefects] = useState<Defect[]>(INITIAL_CRIT);
+  const [nextRecId, setNextRecId] = useState(3);
+  const [nextCritId, setNextCritId] = useState(2);
 
-  const addDefect = () => {
-    setDefects([...defects, { id: nextId, zone: "", description: "", severity: "low", recommendation: "" }]);
-    setNextId(nextId + 1);
+  const addDefect = (section: "rec" | "crit") => {
+    if (section === "rec") {
+      setRecDefects([...recDefects, { id: nextRecId, zone: "", description: "", severity: "low", recommendation: "" }]);
+      setNextRecId(nextRecId + 1);
+    } else {
+      setCritDefects([...critDefects, { id: nextCritId, zone: "", description: "", severity: "high", recommendation: "" }]);
+      setNextCritId(nextCritId + 1);
+    }
   };
 
-  const removeDefect = (id: number) => setDefects(defects.filter((d) => d.id !== id));
+  const removeDefect = (section: "rec" | "crit", id: number) => {
+    if (section === "rec") setRecDefects(recDefects.filter((d) => d.id !== id));
+    else setCritDefects(critDefects.filter((d) => d.id !== id));
+  };
 
-  const updateDefect = (id: number, field: keyof Defect, value: string) =>
-    setDefects(defects.map((d) => (d.id === id ? { ...d, [field]: value } : d)));
+  const updateDefect = (section: "rec" | "crit", id: number, field: keyof Defect, value: string) => {
+    if (section === "rec") setRecDefects(recDefects.map((d) => (d.id === id ? { ...d, [field]: value } : d)));
+    else setCritDefects(critDefects.map((d) => (d.id === id ? { ...d, [field]: value } : d)));
+  };
 
-  const criticalCount = defects.filter((d) => d.severity === "high").length;
+  const criticalCount = critDefects.length;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--eng-bg)" }}>
@@ -140,24 +132,19 @@ export default function Index() {
           </div>
 
           {/* ── TITLE */}
-          <div className="px-8 py-4 flex items-center justify-between animate-fade-in animate-delay-200" style={{ borderBottom: "1.5px solid var(--eng-line)" }}>
-            <div>
-              <div style={{ ...oswaldStyle, fontSize: 20, fontWeight: 600, letterSpacing: "0.12em", color: "var(--eng-ink)" }}>
-                ВЕДОМОСТЬ ОСМОТРА АВТОМОБИЛЯ
-              </div>
-              <div style={{ height: 2, backgroundColor: "var(--eng-accent)", width: "60%", marginTop: 4 }} />
+          <div className="px-8 py-5 animate-fade-in animate-delay-200" style={{ borderBottom: "3px solid var(--eng-ink)", borderTop: "1.5px solid var(--eng-line)" }}>
+            <div style={{ ...oswaldStyle, fontSize: 22, fontWeight: 700, letterSpacing: "0.14em", color: "var(--eng-ink)", textAlign: "center" }}>
+              ДЕФЕКТОВОЧНАЯ ВЕДОМОСТЬ
             </div>
-            {criticalCount > 0 && (
-              <div className="eng-stamp no-print px-4 py-2" style={{ fontSize: 13 }}>
-                ! {criticalCount} КРИТИЧ.
-              </div>
-            )}
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 6 }}>
+              <div style={{ height: 2, backgroundColor: "var(--eng-accent)", width: 180 }} />
+            </div>
           </div>
 
           {/* ── VEHICLE INFO */}
           <div className="px-8 py-5 animate-fade-in animate-delay-200" style={{ borderBottom: "1.5px solid var(--eng-line)" }}>
             <div style={{ ...oswaldStyle, fontSize: 11, letterSpacing: "0.2em", color: "var(--eng-accent2)", marginBottom: 12 }}>
-              РАЗДЕЛ I · СВЕДЕНИЯ ОБ АВТОМОБИЛЕ И ВЛАДЕЛЬЦЕ
+              СВЕДЕНИЯ ОБ АВТОМОБИЛЕ И ВЛАДЕЛЬЦЕ
             </div>
             <div className="grid grid-cols-2 gap-x-8">
               {[
@@ -180,104 +167,140 @@ export default function Index() {
             </div>
           </div>
 
-          {/* ── DEFECTS */}
-          <div className="px-8 py-6 animate-fade-in animate-delay-300">
+          {/* ══ РАЗДЕЛ I — РЕКОМЕНДАЦИИ */}
+          <div className="px-8 py-6 animate-fade-in animate-delay-300" style={{ borderBottom: "1.5px solid var(--eng-line)" }}>
             <div className="flex items-center justify-between mb-5">
-              <div>
-                <div style={{ ...oswaldStyle, fontSize: 11, letterSpacing: "0.2em", color: "var(--eng-accent2)", marginBottom: 4 }}>
-                  РАЗДЕЛ II
-                </div>
-                <div style={{ ...oswaldStyle, fontSize: 16, fontWeight: 600, letterSpacing: "0.1em", color: "var(--eng-ink)" }}>
-                  ВЫЯВЛЕННЫЕ ПРОБЛЕМЫ И ПОВРЕЖДЕНИЯ
+              <div className="flex items-center gap-4">
+                <div style={{ width: 4, height: 40, backgroundColor: "var(--eng-accent2)" }} />
+                <div>
+                  <div style={{ ...oswaldStyle, fontSize: 10, letterSpacing: "0.22em", color: "var(--eng-accent2)", marginBottom: 3 }}>
+                    РАЗДЕЛ I
+                  </div>
+                  <div style={{ ...oswaldStyle, fontSize: 17, fontWeight: 700, letterSpacing: "0.1em", color: "var(--eng-ink)" }}>
+                    РЕКОМЕНДАЦИИ
+                  </div>
                 </div>
               </div>
               <button
-                onClick={addDefect}
+                onClick={() => addDefect("rec")}
                 className="no-print flex items-center gap-2 px-4 py-2"
-                style={{ ...monoStyle, border: "1.5px solid var(--eng-ink)", fontSize: 11, letterSpacing: "0.1em", backgroundColor: "var(--eng-ink)", color: "#fff", cursor: "pointer" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--eng-accent)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--eng-accent)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "var(--eng-ink)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--eng-ink)"; }}
+                style={{ ...monoStyle, border: "1.5px solid var(--eng-accent2)", fontSize: 11, letterSpacing: "0.1em", backgroundColor: "var(--eng-accent2)", color: "#fff", cursor: "pointer" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.8"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
               >
                 <Icon name="Plus" size={12} />
-                ДОБАВИТЬ ПОЗИЦИЮ
+                ДОБАВИТЬ
               </button>
             </div>
 
-            {/* Table header */}
-            <div
-              className="grid mb-1"
-              style={{ gridTemplateColumns: "32px 155px 1fr 148px 195px 36px", gap: "0 12px", borderBottom: "2px solid var(--eng-ink)", paddingBottom: 6 }}
-            >
-              {["№", "ЗОНА / УЗЕЛ", "ОПИСАНИЕ ДЕФЕКТА", "СТЕПЕНЬ", "РЕКОМЕНДАЦИИ", ""].map((h, i) => (
+            <div className="grid mb-1" style={{ gridTemplateColumns: "32px 170px 1fr 36px", gap: "0 12px", borderBottom: "2px solid var(--eng-accent2)", paddingBottom: 6 }}>
+              {["№", "ЗОНА / УЗЕЛ", "ОПИСАНИЕ И РЕКОМЕНДАЦИЯ", ""].map((h, i) => (
                 <span key={i} style={{ ...oswaldStyle, fontSize: 9, letterSpacing: "0.18em", color: "rgba(26,26,46,0.4)" }}>{h}</span>
               ))}
             </div>
 
-            {/* Rows */}
-            {defects.map((defect, idx) => {
-              const sev = SEVERITY_OPTIONS.find((s) => s.value === defect.severity)!;
-              return (
-                <div
-                  key={defect.id}
-                  className="grid items-start py-3"
-                  style={{ gridTemplateColumns: "32px 155px 1fr 148px 195px 36px", gap: "0 12px", borderBottom: "1px dashed var(--eng-line)" }}
+            {recDefects.map((defect, idx) => (
+              <div key={defect.id} className="grid items-start py-3" style={{ gridTemplateColumns: "32px 170px 1fr 36px", gap: "0 12px", borderBottom: "1px dashed var(--eng-line)" }}>
+                <span style={{ ...monoStyle, fontSize: 12, color: "rgba(26,26,46,0.3)", paddingTop: 7 }}>
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
+                <input
+                  value={defect.zone}
+                  onChange={(e) => updateDefect("rec", defect.id, "zone", e.target.value)}
+                  placeholder="Узел / зона"
+                  style={{ ...monoStyle, fontSize: 12, fontWeight: 600, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid var(--eng-line)", backgroundColor: "transparent", outline: "none", padding: "6px 0", width: "100%" }}
+                />
+                <textarea
+                  value={defect.description}
+                  onChange={(e) => updateDefect("rec", defect.id, "description", e.target.value)}
+                  placeholder="Описание и рекомендуемые работы..."
+                  rows={2}
+                  style={{ ...monoStyle, fontSize: 11, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid var(--eng-line)", backgroundColor: "transparent", outline: "none", padding: "6px 0", resize: "none", width: "100%", lineHeight: 1.5 }}
+                />
+                <button
+                  onClick={() => removeDefect("rec", defect.id)}
+                  className="no-print flex items-start justify-center pt-2"
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(26,26,46,0.28)" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--eng-accent)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(26,26,46,0.28)"; }}
                 >
-                  <span style={{ ...monoStyle, fontSize: 12, color: "rgba(26,26,46,0.3)", paddingTop: 7 }}>
-                    {String(idx + 1).padStart(2, "0")}
-                  </span>
+                  <Icon name="X" size={13} />
+                </button>
+              </div>
+            ))}
 
-                  <input
-                    value={defect.zone}
-                    onChange={(e) => updateDefect(defect.id, "zone", e.target.value)}
-                    placeholder="Узел / зона"
-                    style={{ ...monoStyle, fontSize: 12, fontWeight: 600, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid var(--eng-line)", backgroundColor: "transparent", outline: "none", padding: "6px 0", width: "100%" }}
-                  />
+            {recDefects.length === 0 && (
+              <div className="py-8 text-center" style={{ ...monoStyle, fontSize: 12, color: "rgba(26,26,46,0.3)", letterSpacing: "0.1em", borderBottom: "1px dashed var(--eng-line)" }}>
+                — РЕКОМЕНДАЦИИ НЕ ДОБАВЛЕНЫ —
+              </div>
+            )}
+          </div>
 
-                  <textarea
-                    value={defect.description}
-                    onChange={(e) => updateDefect(defect.id, "description", e.target.value)}
-                    placeholder="Описание повреждения..."
-                    rows={2}
-                    style={{ ...monoStyle, fontSize: 11, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid var(--eng-line)", backgroundColor: "transparent", outline: "none", padding: "6px 0", resize: "none", width: "100%", lineHeight: 1.5 }}
-                  />
-
-                  <div className="pt-1">
-                    <select
-                      value={defect.severity}
-                      onChange={(e) => updateDefect(defect.id, "severity", e.target.value)}
-                      className={sev.cls}
-                      style={{ ...monoStyle, fontSize: 10, cursor: "pointer", outline: "none", appearance: "none", textAlign: "center", padding: "4px 8px", width: "100%" }}
-                    >
-                      {SEVERITY_OPTIONS.map((s) => (
-                        <option key={s.value} value={s.value}>{s.label}</option>
-                      ))}
-                    </select>
+          {/* ══ РАЗДЕЛ II — КРИТИЧЕСКИЕ НЕИСПРАВНОСТИ */}
+          <div className="px-8 py-6 animate-fade-in animate-delay-400">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-4">
+                <div style={{ width: 4, height: 40, backgroundColor: "var(--eng-accent)" }} />
+                <div>
+                  <div style={{ ...oswaldStyle, fontSize: 10, letterSpacing: "0.22em", color: "var(--eng-accent)", marginBottom: 3 }}>
+                    РАЗДЕЛ II
                   </div>
-
-                  <textarea
-                    value={defect.recommendation}
-                    onChange={(e) => updateDefect(defect.id, "recommendation", e.target.value)}
-                    placeholder="Рекомендуемые работы..."
-                    rows={2}
-                    style={{ ...monoStyle, fontSize: 11, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid var(--eng-line)", backgroundColor: "transparent", outline: "none", padding: "6px 0", resize: "none", width: "100%", lineHeight: 1.5 }}
-                  />
-
-                  <button
-                    onClick={() => removeDefect(defect.id)}
-                    className="no-print flex items-start justify-center pt-2"
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(26,26,46,0.28)" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--eng-accent)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(26,26,46,0.28)"; }}
-                  >
-                    <Icon name="X" size={13} />
-                  </button>
+                  <div style={{ ...oswaldStyle, fontSize: 17, fontWeight: 700, letterSpacing: "0.1em", color: "var(--eng-ink)" }}>
+                    КРИТИЧЕСКИЕ НЕИСПРАВНОСТИ
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+              <button
+                onClick={() => addDefect("crit")}
+                className="no-print flex items-center gap-2 px-4 py-2"
+                style={{ ...monoStyle, border: "1.5px solid var(--eng-accent)", fontSize: 11, letterSpacing: "0.1em", backgroundColor: "var(--eng-accent)", color: "#fff", cursor: "pointer" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.8"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+              >
+                <Icon name="Plus" size={12} />
+                ДОБАВИТЬ
+              </button>
+            </div>
 
-            {defects.length === 0 && (
-              <div className="py-12 text-center" style={{ ...monoStyle, fontSize: 12, color: "rgba(26,26,46,0.3)", letterSpacing: "0.1em", borderBottom: "1px dashed var(--eng-line)" }}>
-                — ДЕФЕКТЫ НЕ ЗАФИКСИРОВАНЫ —
+            <div className="grid mb-1" style={{ gridTemplateColumns: "32px 170px 1fr 36px", gap: "0 12px", borderBottom: "2px solid var(--eng-accent)", paddingBottom: 6 }}>
+              {["№", "ЗОНА / УЗЕЛ", "ОПИСАНИЕ НЕИСПРАВНОСТИ", ""].map((h, i) => (
+                <span key={i} style={{ ...oswaldStyle, fontSize: 9, letterSpacing: "0.18em", color: "rgba(26,26,46,0.4)" }}>{h}</span>
+              ))}
+            </div>
+
+            {critDefects.map((defect, idx) => (
+              <div key={defect.id} className="grid items-start py-3" style={{ gridTemplateColumns: "32px 170px 1fr 36px", gap: "0 12px", borderBottom: "1px dashed var(--eng-line)", backgroundColor: idx % 2 === 0 ? "rgba(200,56,26,0.03)" : "transparent" }}>
+                <span style={{ ...monoStyle, fontSize: 12, color: "var(--eng-accent)", paddingTop: 7, fontWeight: 600 }}>
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
+                <input
+                  value={defect.zone}
+                  onChange={(e) => updateDefect("crit", defect.id, "zone", e.target.value)}
+                  placeholder="Узел / зона"
+                  style={{ ...monoStyle, fontSize: 12, fontWeight: 600, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid rgba(200,56,26,0.3)", backgroundColor: "transparent", outline: "none", padding: "6px 0", width: "100%" }}
+                />
+                <textarea
+                  value={defect.description}
+                  onChange={(e) => updateDefect("crit", defect.id, "description", e.target.value)}
+                  placeholder="Описание критической неисправности..."
+                  rows={2}
+                  style={{ ...monoStyle, fontSize: 11, color: "var(--eng-ink)", border: "none", borderBottom: "1px solid rgba(200,56,26,0.3)", backgroundColor: "transparent", outline: "none", padding: "6px 0", resize: "none", width: "100%", lineHeight: 1.5 }}
+                />
+                <button
+                  onClick={() => removeDefect("crit", defect.id)}
+                  className="no-print flex items-start justify-center pt-2"
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(26,26,46,0.28)" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--eng-accent)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(26,26,46,0.28)"; }}
+                >
+                  <Icon name="X" size={13} />
+                </button>
+              </div>
+            ))}
+
+            {critDefects.length === 0 && (
+              <div className="py-8 text-center" style={{ ...monoStyle, fontSize: 12, color: "rgba(200,56,26,0.4)", letterSpacing: "0.1em", borderBottom: "1px dashed rgba(200,56,26,0.2)" }}>
+                — КРИТИЧЕСКИХ НЕИСПРАВНОСТЕЙ НЕ ВЫЯВЛЕНО —
               </div>
             )}
           </div>
@@ -285,18 +308,17 @@ export default function Index() {
           {/* ── SUMMARY */}
           <div className="px-8 py-4 flex items-center gap-6 animate-fade-in animate-delay-400" style={{ borderTop: "1.5px solid var(--eng-line)" }}>
             <span style={{ ...monoStyle, fontSize: 10, color: "rgba(26,26,46,0.4)", letterSpacing: "0.1em" }}>
-              ИТОГО ПОЗИЦИЙ: {defects.length}
+              РЕКОМЕНДАЦИИ: {recDefects.length}
             </span>
             <div style={{ flex: 1, borderTop: "1px dashed var(--eng-line)" }} />
-            {SEVERITY_OPTIONS.map((s) => {
-              const count = defects.filter((d) => d.severity === s.value).length;
-              return (
-                <div key={s.value} className="flex items-center gap-2">
-                  <span className={s.cls} style={{ ...monoStyle, fontSize: 9, letterSpacing: "0.08em", padding: "2px 8px" }}>{s.label}</span>
-                  <span style={{ ...oswaldStyle, fontSize: 16, fontWeight: 600, color: "var(--eng-ink)" }}>{count}</span>
-                </div>
-              );
-            })}
+            <div className="flex items-center gap-2">
+              <span style={{ ...monoStyle, fontSize: 10, color: "rgba(26,26,46,0.4)", letterSpacing: "0.1em" }}>
+                КРИТИЧЕСКИЕ:
+              </span>
+              <span style={{ ...oswaldStyle, fontSize: 18, fontWeight: 700, color: critDefects.length > 0 ? "var(--eng-accent)" : "rgba(26,26,46,0.3)" }}>
+                {critDefects.length}
+              </span>
+            </div>
           </div>
 
           {/* ── SIGNATURES */}
