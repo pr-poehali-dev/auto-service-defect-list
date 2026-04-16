@@ -116,9 +116,7 @@ export default function Index() {
                   <div style={{ ...oswaldStyle, fontSize: 26, fontWeight: 700, letterSpacing: "0.06em", lineHeight: 1.1, color: "var(--eng-ink)" }}>
                     МТЕХ-СЕРВИС
                   </div>
-                  <div style={{ ...oswaldStyle, fontSize: 13, fontWeight: 300, letterSpacing: "0.2em", color: "var(--eng-accent2)", marginTop: 2 }}>
-                    ОФИЦИАЛЬНЫЙ СЕРВИС BMW
-                  </div>
+
                 </div>
               </div>
 
